@@ -23,6 +23,7 @@ public class WordTopListInterface {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws MalformedURLException, IOException {
+        // TODO
         System.out.println("WordTopListRecursive application started.");
         List<URL> urlList = new ArrayList<>();
         urlList.add(new URL("https://justinjackson.ca/words.html"));
