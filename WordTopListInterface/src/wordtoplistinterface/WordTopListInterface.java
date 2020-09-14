@@ -31,9 +31,7 @@ public class WordTopListInterface {
         urlList.add(new URL("https://www.bbc.com/"));
         System.out.println("Checked URL-s: " + urlList);
         WordCounter wordCounter = new WordCounter(urlList);
-        Map<String, Integer> topList = new HashMap<>();
-        topList = wordCounter.createTopList();
-        System.out.println("The most frequent words on the checked websites: " + topList);
+        wordCounter.printTopList();
     }
 
 }
