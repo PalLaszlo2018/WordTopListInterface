@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public class WordStoring implements WordStore {
 
     private final List<URL> urlList;
-    private final Set<String> skipTags;
+    private final Set<String> skipTags; // TODO LP: I think there are two categories skip tags and skip words, so you should store the skipWords in another Set
     private final Set<Character> separators;
     private final Map<String, Integer> wordFrequency = new HashMap<>();
     private final static Logger LOGGER = Logger.getLogger(WordStoring.class.getName());
@@ -50,7 +50,8 @@ public class WordStoring implements WordStore {
         String openingTag = findOpeningTag(reader);
         LOGGER.info(openingTag + " (as opening tag) identified.");
         eatTag(openingTag, reader);
-        reader.close();
+        reader.close(); // TODO LP: reader must be closed even if an error happens 
+        // TODO LP: use try-finally or try-with-resource -> https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
     }
 
     private void eatTag(String tag, BufferedReader reader) throws IOException {
@@ -111,7 +112,10 @@ public class WordStoring implements WordStore {
     public void store(String word) {
         if (word.length() > 1 && !skipTags.contains(word)) {
             wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
-        }
+            // TODO LP: your solution is also fine, please check my solution as well
+//            Integer value = wordFrequency.get(word);
+//            wordFrequency.put(word, value == null ? 1: value+1);
+        }        
     }
 
     @Override
@@ -132,17 +136,14 @@ public class WordStoring implements WordStore {
         for (int i = 0; i < n; i++) {
             System.out.print(" " + sortedList.get(i));
         }
-        System.out.println("");
+        System.out.println(""); // TODO LP: do you need this? :)
     }
 
-    private List<Map.Entry<String, Integer>> sortedWordFreq() {
-        List<Map.Entry<String, Integer>> sortedList = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : wordFrequency.entrySet()) {
-            sortedList.add(entry);
-            WordFreqComparator wordFreqComp = new WordFreqComparator();
-            Collections.sort(sortedList, wordFreqComp);
-            Collections.reverse(sortedList);
-        }
+    private List<Map.Entry<String, Integer>> sortedWordFreq() { 
+    // TODO LP: please check my version, this is more compact, your version did a lot of extra work
+        ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<>(wordFrequency.entrySet());
+        Collections.sort(sortedList, new WordFreqComparator());
+        Collections.reverse(sortedList); // TODO LP: you can implement WordFreqComparator the way that you don't need to call the reverse()
         return sortedList;
     }
 

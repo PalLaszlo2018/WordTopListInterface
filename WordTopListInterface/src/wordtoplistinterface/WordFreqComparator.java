@@ -13,6 +13,7 @@ import java.util.Map;
  * @author laszlop
  */
 public class WordFreqComparator implements Comparator<Map.Entry<String, Integer>> {
+    // TODO LP: please write javadoc because it was not obviuos to me what dors this comparator exactly do
 
     @Override
     public int compare(Map.Entry<String, Integer> wordFreq1, Map.Entry<String, Integer> wordFreq2) {

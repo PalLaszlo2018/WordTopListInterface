@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author laszlop
  */
-public class WordCounter {
+public class WordCounter { // TODO LP: I don't think you need this extra class, please check the main() method
 
     private final List<URL> urlList;
     private final static int LENGTH_OF_TOPLIST = 10;
