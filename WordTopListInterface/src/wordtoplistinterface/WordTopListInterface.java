@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List; // TODO LP: please do not leave unused imports in the file! (CTRL+SHIFT+i)
+import java.util.List;
 
 /**
- *
+ * This application allows you to give some URL-s, and it will collect the X most used words of the content of the given homepages.
+ * You can add skipwords, which will not be collected. You can define the value of X as well.
  * @author laszlop
  */
 public class WordTopListInterface {
@@ -28,10 +29,7 @@ public class WordTopListInterface {
         urlList.add(new URL("https://www.javatpoint.com/java-tutorial"));
         urlList.add(new URL("https://www.bbc.com/"));
         System.out.println("Checked URL-s: " + urlList);
-        WordCounter wordCounter = new WordCounter(urlList);
-        wordCounter.printTopList();
-               
-        // TODO LP: I can do everything without WordCounter class
+              
         WordStoring wordStoring = new WordStoring(urlList);
         wordStoring.addSkipWord("an");
         wordStoring.addSkipWord("and");
@@ -40,6 +38,7 @@ public class WordTopListInterface {
         wordStoring.addSkipWord("if");
         wordStoring.addSkipWord("in");
         wordStoring.addSkipWord("is");
+        wordStoring.addSkipWord("it");
         wordStoring.addSkipWord("of");
         wordStoring.addSkipWord("on");
         wordStoring.addSkipWord("that");

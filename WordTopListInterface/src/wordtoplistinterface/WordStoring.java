@@ -20,13 +20,14 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- *
+ *This class manages the processing of the got URLList, collects the words of the contents in a Map.
  * @author laszlop
  */
 public class WordStoring implements WordStore {
 
     private final List<URL> urlList;
-    private final Set<String> skipTags; // TODO LP: I think there are two categories skip tags and skip words, so you should store the skipWords in another Set
+    private final Set<String> skipWords = new HashSet<>();
+    private final Set<String> skipTags;
     private final Set<Character> separators;
     private final Map<String, Integer> wordFrequency = new HashMap<>();
     private final static Logger LOGGER = Logger.getLogger(WordStoring.class.getName());
@@ -34,25 +35,43 @@ public class WordStoring implements WordStore {
     public WordStoring(List<URL> urlList) {
         this.urlList = urlList;
         this.skipTags = new HashSet<>(Arrays.asList("head", "style")); // texts between these tags are ignored
-        this.separators = new HashSet<>(Arrays.asList(' ','"','(', ')','*', '<', '.', ':', '?', '!', ';', '-', '–', '=', '{', '}'));
+        this.separators = new HashSet<>(Arrays.asList(' ', '"', '(', ')', '*', '<', '.', ':', '?', '!', ';', '-', '–', '=', '{', '}'));
     }
 
+    /**
+     * Loops on the URLlist, and starts the processing for each URL.
+     *
+     * @throws IOException
+     */
     public void processURLs() throws IOException {
         for (int i = 0; i < urlList.size(); i++) {
             URL url = urlList.get(i);
             processContent(url);
         }
     }
+    
+    /**
+     * Opens a reader for the got URL, finds the opening tag, and starts the substantive work by calling the eatTag method.
+     * @param url
+     * @throws IOException 
+     */
 
     public void processContent(URL url) throws IOException {
         LOGGER.info("Processing of the homepage " + url.toString() + " started");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-        String openingTag = findOpeningTag(reader);
-        LOGGER.info(openingTag + " (as opening tag) identified.");
-        eatTag(openingTag, reader);
-        reader.close(); // TODO LP: reader must be closed even if an error happens 
-        // TODO LP: use try-finally or try-with-resource -> https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            String openingTag = findOpeningTag(reader);
+            LOGGER.info(openingTag + " (as opening tag) identified.");
+            eatTag(openingTag, reader);
+        }
     }
+    
+    /**
+     * Reads the content of the URL, the found words will be put into a Map, found opening tags start the method recursive,
+     * found closing tags close the (sub)method.
+     * @param tag
+     * @param reader
+     * @throws IOException 
+     */
 
     private void eatTag(String tag, BufferedReader reader) throws IOException {
         int value;
@@ -81,6 +100,13 @@ public class WordStoring implements WordStore {
             word.append(character);
         }
     }
+    
+    /**
+     * This method finds the first opeening tag, this tag is needed to start the substantive eatTag method.
+     * @param reader
+     * @return opening tag
+     * @throws IOException 
+     */
 
     private String findOpeningTag(BufferedReader reader) throws IOException {
         int value;
@@ -94,6 +120,13 @@ public class WordStoring implements WordStore {
         }
         return openingTag;
     }
+    
+    /**
+     * This method builds up the tag from the read characters.
+     * @param reader
+     * @return tag
+     * @throws IOException 
+     */
 
     private String buildTag(BufferedReader reader) throws IOException {
         StringBuilder tag = new StringBuilder();
@@ -107,27 +140,43 @@ public class WordStoring implements WordStore {
         }
         return tag.toString().toLowerCase();
     }
+    
+    /**
+     * This methods store the found word if it is at least 2 char long, and it is not in the skipWords Set.
+     * @param word 
+     */
 
     @Override
     public void store(String word) {
-        if (word.length() > 1 && !skipTags.contains(word)) {
+        if (word.length() > 1 && !skipWords.contains(word)) {
             wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
-            // TODO LP: your solution is also fine, please check my solution as well
-//            Integer value = wordFrequency.get(word);
-//            wordFrequency.put(word, value == null ? 1: value+1);
-        }        
+        }
     }
+    
+    /**
+     * This method add the got word to the Set which contains the words to be ignored.
+     * @param word 
+     */
 
     @Override
     public void addSkipWord(String word) {
-        skipTags.add(word);
-        LOGGER.info(word + " (as tag to skip) added.");
+        skipWords.add(word);
+        LOGGER.info(word + " (as word to ignore) added.");
     }
+    
+    /**
+     * Prints the full list of the found words.
+     */
 
     @Override
     public void print() {
         System.out.println("Full frequency list: " + sortedWordFreq());
     }
+    
+    /**
+     * Prints the n-sized toplist of the found words.
+     * @param n 
+     */
 
     @Override
     public void print(int n) {
@@ -136,14 +185,17 @@ public class WordStoring implements WordStore {
         for (int i = 0; i < n; i++) {
             System.out.print(" " + sortedList.get(i));
         }
-        System.out.println(""); // TODO LP: do you need this? :)
+        System.out.println("\n");
     }
+    
+    /**
+     * Creates the sorted List of the entries of the Map.
+     * @return 
+     */
 
-    private List<Map.Entry<String, Integer>> sortedWordFreq() { 
-    // TODO LP: please check my version, this is more compact, your version did a lot of extra work
+    private List<Map.Entry<String, Integer>> sortedWordFreq() {
         ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<>(wordFrequency.entrySet());
         Collections.sort(sortedList, new WordFreqComparator());
-        Collections.reverse(sortedList); // TODO LP: you can implement WordFreqComparator the way that you don't need to call the reverse()
         return sortedList;
     }
 
